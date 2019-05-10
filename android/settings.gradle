@@ -1,0 +1,3 @@
+rootProject.name = 'authTake2'
+
+include ':app'

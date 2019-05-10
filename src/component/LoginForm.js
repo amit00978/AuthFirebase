@@ -1,0 +1,87 @@
+import React, { Component } from 'react';
+import { View, Text, TextInput } from 'react-native';
+import firebase from 'firebase';
+import { Button, Card, CardSection, Input, Spinner } from './common';
+class LoginForm extends Component {
+
+ 
+    state = {
+        email: '',
+        password: '',
+        error: '',
+        loading: false
+    }
+ 
+    onButtonPress() {
+        const { email, password } = this.state;
+        this.setState({ error: '', loading: true })
+        firebase.auth().signInWithEmailAndPassword(email, password)
+            .then(this.onLoginSuccess())
+            .catch(() => {
+                firebase.auth().createUserWithEmailAndPassword(email, password)
+                    .then(this.onLoginSuccess())
+                    .catch(() => {
+                        this.setState({ error: 'Authentication Failed.', loading: false })
+                    })
+            });
+    }
+
+    onLoginSuccess(){
+        this.setState({
+            email:'',
+            password:'',
+            loading: false,
+            error:''
+        })
+    }
+    renderButton() {
+        if (this.state.loading) {
+            return <Spinner size='small' />
+        } else {
+            return (
+                <Button onPress={this.onButtonPress.bind(this)}>
+                    Log In
+                </Button>
+            )
+        }
+    }
+
+    render() {
+        return (
+            <Card>
+                <CardSection>
+                    <Input
+                        label="Email"
+                        secureTextEntry={false}
+                        placeholder="Please enter the Email"
+                        value={this.state.email}
+                        onChangeText={email => this.setState({ email })}
+                    />
+                </CardSection>
+                <CardSection>
+
+                    <Input
+                        label="password"
+                        secureTextEntry={true}
+                        placeholder="Please enter the Password"
+                        value={this.state.password}
+                        onChangeText={password => this.setState({ password })}
+                    />
+                </CardSection>
+                <Text style={styles.errorStyle}>{this.state.error}</Text>
+                <CardSection>
+                    {this.renderButton()}
+                </CardSection>
+            </Card>
+        )
+    }
+}
+
+const styles = {
+    errorStyle: {
+        alignSelf: 'center',
+        color: 'red',
+        fontSize: 20,
+    }
+}
+export default LoginForm;
